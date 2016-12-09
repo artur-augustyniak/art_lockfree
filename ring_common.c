@@ -66,7 +66,7 @@ int main(int argc, char *argv[] __unused)
 		assert(!ret);
 	}
 
-	if (clock_gettime(CLOCK_REALTIME, &start))
+	if (clock_gettime(CLOCK_MONOTONIC, &start))
 		return -1;
 
 	for (i = 0; i < THREAD_CNT; i++) {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[] __unused)
 		sum += cnt;
 	}
 
-	if (clock_gettime(CLOCK_REALTIME, &stop))
+	if (clock_gettime(CLOCK_MONOTONIC, &stop))
 		return -1;
 
 	stop.tv_nsec -= start.tv_nsec;
@@ -85,11 +85,11 @@ int main(int argc, char *argv[] __unused)
 	}
 	stop.tv_sec -= start.tv_sec;
 
-	persec = (double)sum / ((double)stop.tv_sec + \
-				(double)1000000000 / (double)stop.tv_nsec);
+	double nsec = (stop.tv_sec * 1e9f + stop.tv_nsec);
+	persec = (sum * 1e9f) / nsec;
 
-	printf("%s took %lld.%.9ld processed %g per sec\n", argv[0],
-	       (long long)stop.tv_sec, stop.tv_nsec, persec);
+	printf("%s took %.3g sec processed %.3g per sec\n", argv[0],
+	       nsec/1e9f, persec);
 
 	return 0;
 }
